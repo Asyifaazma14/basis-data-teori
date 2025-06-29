@@ -1,0 +1,120 @@
+CREATE TABLE User (
+  User_ID INT AUTO_INCREMENT PRIMARY KEY,
+  Nama_User VARCHAR(100) NOT NULL,
+  Email VARCHAR(100) NOT NULL UNIQUE,
+  Password VARCHAR(255) NOT NULL,
+  Tanggal_Daftar DATE,
+  Foto_Profile VARCHAR(255)
+);
+CREATE TABLE Mentor (
+  Mentor_ID INT AUTO_INCREMENT PRIMARY KEY,
+  User_ID INT NOT NULL,
+  Keahlian VARCHAR(100),
+  LinkedIn VARCHAR(255),
+  FOREIGN KEY (User_ID) REFERENCES User(User_ID)
+);
+CREATE TABLE Peserta (
+  Peserta_ID INT AUTO_INCREMENT PRIMARY KEY,
+  User_ID INT NOT NULL,
+  Alamat VARCHAR(255),
+  No_Hp VARCHAR(20),
+  Asal_Sekolah VARCHAR(100),
+  Status_Lulus ENUM('Lulus','Belum Lulus'),
+  FOREIGN KEY (User_ID) REFERENCES User(User_ID)
+);
+CREATE TABLE Kelas (
+  Kelas_ID INT AUTO_INCREMENT PRIMARY KEY,
+  Nama_Kelas VARCHAR(100) NOT NULL,
+  Deskripsi_Kelas TEXT,
+  Tgl_Mulai DATE,
+  Tgl_Akhir DATE,
+  Status_Kelas ENUM('Aktif','Nonaktif')
+);
+CREATE TABLE Modul (
+  Modul_ID INT AUTO_INCREMENT PRIMARY KEY,
+  Kelas_ID INT NOT NULL,
+  Nama_Modul VARCHAR(100) NOT NULL,
+  Deskripsi_Modul TEXT,
+  Tgl_Dikirim DATE,
+  Url_Modul VARCHAR(255),
+  FOREIGN KEY (Kelas_ID) REFERENCES Kelas(Kelas_ID)
+);
+CREATE TABLE Tugas (
+  Tugas_ID INT AUTO_INCREMENT PRIMARY KEY,
+  Modul_ID INT NOT NULL,
+  Judul_Tugas VARCHAR(100) NOT NULL,
+  Deskripsi_Tugas TEXT,
+  File_Lampiran VARCHAR(255),
+  Link_Lampiran VARCHAR(255),
+  Tgl_Dibuat DATE,
+  Batas_Kumpul DATE,
+  FOREIGN KEY (Modul_ID) REFERENCES Modul(Modul_ID)
+);
+CREATE TABLE Status_Tugas (
+  Status_ID INT AUTO_INCREMENT PRIMARY KEY,
+  Status_Tugas VARCHAR(50) NOT NULL
+);
+CREATE TABLE Pengumpulan_Tugas (
+  Pengumpulan_ID INT AUTO_INCREMENT PRIMARY KEY,
+  Tugas_ID INT NOT NULL,
+  User_ID INT NOT NULL,
+  Waktu_Kumpul DATETIME,
+  File_Jawaban VARCHAR(255),
+  Link_Jawaban VARCHAR(255),
+  Catatan_Mentor TEXT,
+  Nilai DECIMAL(5,2),
+  Status_ID INT,
+  FOREIGN KEY (Tugas_ID) REFERENCES Tugas(Tugas_ID),
+  FOREIGN KEY (User_ID) REFERENCES User(User_ID),
+  FOREIGN KEY (Status_ID) REFERENCES Status_Tugas(Status_ID)
+);
+CREATE TABLE Sertifikat (
+  Sertifikat_ID INT AUTO_INCREMENT PRIMARY KEY,
+  User_ID INT NOT NULL,
+  Kelas_ID INT NOT NULL,
+  Tgl_Daftar_Sertifikat DATE,
+  Nilai_Akhir DECIMAL(5,2),
+  FOREIGN KEY (User_ID) REFERENCES User(User_ID),
+  FOREIGN KEY (Kelas_ID) REFERENCES Kelas(Kelas_ID)
+);
+CREATE TABLE Status_Sertifikat (
+  Status_ID INT AUTO_INCREMENT PRIMARY KEY,
+  Status_Sertifikat VARCHAR(50) NOT NULL
+);
+ALTER TABLE Sertifikat
+ADD COLUMN Status_ID INT,
+ADD FOREIGN KEY (Status_ID) REFERENCES Status_Sertifikat(Status_ID);
+
+CREATE USER 'elearn_user'@'localhost' IDENTIFIED BY 'passwordku';
+GRANT ALL PRIVILEGES ON eLearningDB.* TO 'elearn_user'@'localhost';
+ALTER TABLE User ADD COLUMN Role ENUM('admin','mentor','peserta') DEFAULT 'peserta';
+
+ALTER TABLE User MODIFY Role ENUM('admin','mentor','peserta') DEFAULT 'peserta';
+INSERT INTO User (Nama_User, Email, Password, Role, Tanggal_Daftar)
+VALUES (
+  'Mentor 1',
+  'mentor1@example.com',
+  '$2y$10$wwuDpqFZ8GP4YeD0RAy1kuGNGClTBZ8RYUXozPvT0p8cT39FMfa/mm',
+  'mentor',
+  NOW()
+);
+UPDATE User
+SET
+  Nama_User = 'Mentor 1',
+  Email = 'mentor1@gmail.com',
+  Password = '$2y$10$wwuDpqFZ8GP4YeD0RAy1kuGNGClTBZ8RYUXozPvT0p8cT39FMfa/mm',
+  Role = 'mentor'
+WHERE User_ID = 3;  -- ganti 3 dengan id user yg mau diupdate
+SELECT User_ID, Email, Password, Role FROM User WHERE Email = 'mentor1@example.com';
+SELECT * FROM User;
+UPDATE User
+SET Password = 'mentor123'
+WHERE Email = 'mentor1@gmail.com';
+drop all user;
+INSERT INTO kelas (Nama_Kelas) VALUES ('Kelas X');
+INSERT INTO status_tugas (Status_ID, Status_Tugas) VALUES
+(1, 'Belum Dinilai'),
+(2, 'Sudah Dinilai');
+INSERT INTO status_tugas (Status_ID, Status_Tugas) VALUES (1, 'Belum Dinilai'), (2, 'Sudah Dinilai');
+DELETE FROM status_tugas;
+SELECT * FROM pengumpulan_tugas;
